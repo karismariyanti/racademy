@@ -1,0 +1,682 @@
+\documentclass[]{article}
+\usepackage{lmodern}
+\usepackage{amssymb,amsmath}
+\usepackage{ifxetex,ifluatex}
+\usepackage{fixltx2e} % provides \textsubscript
+\ifnum 0\ifxetex 1\fi\ifluatex 1\fi=0 % if pdftex
+  \usepackage[T1]{fontenc}
+  \usepackage[utf8]{inputenc}
+\else % if luatex or xelatex
+  \ifxetex
+    \usepackage{mathspec}
+  \else
+    \usepackage{fontspec}
+  \fi
+  \defaultfontfeatures{Ligatures=TeX,Scale=MatchLowercase}
+\fi
+% use upquote if available, for straight quotes in verbatim environments
+\IfFileExists{upquote.sty}{\usepackage{upquote}}{}
+% use microtype if available
+\IfFileExists{microtype.sty}{%
+\usepackage{microtype}
+\UseMicrotypeSet[protrusion]{basicmath} % disable protrusion for tt fonts
+}{}
+\usepackage[margin=1in]{geometry}
+\usepackage{hyperref}
+\hypersetup{unicode=true,
+            pdftitle={K-means Clustering},
+            pdfauthor={Muhammad Apriandito},
+            pdfborder={0 0 0},
+            breaklinks=true}
+\urlstyle{same}  % don't use monospace font for urls
+\usepackage{color}
+\usepackage{fancyvrb}
+\newcommand{\VerbBar}{|}
+\newcommand{\VERB}{\Verb[commandchars=\\\{\}]}
+\DefineVerbatimEnvironment{Highlighting}{Verbatim}{commandchars=\\\{\}}
+% Add ',fontsize=\small' for more characters per line
+\usepackage{framed}
+\definecolor{shadecolor}{RGB}{248,248,248}
+\newenvironment{Shaded}{\begin{snugshade}}{\end{snugshade}}
+\newcommand{\AlertTok}[1]{\textcolor[rgb]{0.94,0.16,0.16}{#1}}
+\newcommand{\AnnotationTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
+\newcommand{\AttributeTok}[1]{\textcolor[rgb]{0.77,0.63,0.00}{#1}}
+\newcommand{\BaseNTok}[1]{\textcolor[rgb]{0.00,0.00,0.81}{#1}}
+\newcommand{\BuiltInTok}[1]{#1}
+\newcommand{\CharTok}[1]{\textcolor[rgb]{0.31,0.60,0.02}{#1}}
+\newcommand{\CommentTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textit{#1}}}
+\newcommand{\CommentVarTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
+\newcommand{\ConstantTok}[1]{\textcolor[rgb]{0.00,0.00,0.00}{#1}}
+\newcommand{\ControlFlowTok}[1]{\textcolor[rgb]{0.13,0.29,0.53}{\textbf{#1}}}
+\newcommand{\DataTypeTok}[1]{\textcolor[rgb]{0.13,0.29,0.53}{#1}}
+\newcommand{\DecValTok}[1]{\textcolor[rgb]{0.00,0.00,0.81}{#1}}
+\newcommand{\DocumentationTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
+\newcommand{\ErrorTok}[1]{\textcolor[rgb]{0.64,0.00,0.00}{\textbf{#1}}}
+\newcommand{\ExtensionTok}[1]{#1}
+\newcommand{\FloatTok}[1]{\textcolor[rgb]{0.00,0.00,0.81}{#1}}
+\newcommand{\FunctionTok}[1]{\textcolor[rgb]{0.00,0.00,0.00}{#1}}
+\newcommand{\ImportTok}[1]{#1}
+\newcommand{\InformationTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
+\newcommand{\KeywordTok}[1]{\textcolor[rgb]{0.13,0.29,0.53}{\textbf{#1}}}
+\newcommand{\NormalTok}[1]{#1}
+\newcommand{\OperatorTok}[1]{\textcolor[rgb]{0.81,0.36,0.00}{\textbf{#1}}}
+\newcommand{\OtherTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{#1}}
+\newcommand{\PreprocessorTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textit{#1}}}
+\newcommand{\RegionMarkerTok}[1]{#1}
+\newcommand{\SpecialCharTok}[1]{\textcolor[rgb]{0.00,0.00,0.00}{#1}}
+\newcommand{\SpecialStringTok}[1]{\textcolor[rgb]{0.31,0.60,0.02}{#1}}
+\newcommand{\StringTok}[1]{\textcolor[rgb]{0.31,0.60,0.02}{#1}}
+\newcommand{\VariableTok}[1]{\textcolor[rgb]{0.00,0.00,0.00}{#1}}
+\newcommand{\VerbatimStringTok}[1]{\textcolor[rgb]{0.31,0.60,0.02}{#1}}
+\newcommand{\WarningTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
+\usepackage{graphicx,grffile}
+\makeatletter
+\def\maxwidth{\ifdim\Gin@nat@width>\linewidth\linewidth\else\Gin@nat@width\fi}
+\def\maxheight{\ifdim\Gin@nat@height>\textheight\textheight\else\Gin@nat@height\fi}
+\makeatother
+% Scale images if necessary, so that they will not overflow the page
+% margins by default, and it is still possible to overwrite the defaults
+% using explicit options in \includegraphics[width, height, ...]{}
+\setkeys{Gin}{width=\maxwidth,height=\maxheight,keepaspectratio}
+\IfFileExists{parskip.sty}{%
+\usepackage{parskip}
+}{% else
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{6pt plus 2pt minus 1pt}
+}
+\setlength{\emergencystretch}{3em}  % prevent overfull lines
+\providecommand{\tightlist}{%
+  \setlength{\itemsep}{0pt}\setlength{\parskip}{0pt}}
+\setcounter{secnumdepth}{0}
+% Redefines (sub)paragraphs to behave more like sections
+\ifx\paragraph\undefined\else
+\let\oldparagraph\paragraph
+\renewcommand{\paragraph}[1]{\oldparagraph{#1}\mbox{}}
+\fi
+\ifx\subparagraph\undefined\else
+\let\oldsubparagraph\subparagraph
+\renewcommand{\subparagraph}[1]{\oldsubparagraph{#1}\mbox{}}
+\fi
+
+%%% Use protect on footnotes to avoid problems with footnotes in titles
+\let\rmarkdownfootnote\footnote%
+\def\footnote{\protect\rmarkdownfootnote}
+
+%%% Change title format to be more compact
+\usepackage{titling}
+
+% Create subtitle command for use in maketitle
+\providecommand{\subtitle}[1]{
+  \posttitle{
+    \begin{center}\large#1\end{center}
+    }
+}
+
+\setlength{\droptitle}{-2em}
+
+  \title{K-means Clustering}
+    \pretitle{\vspace{\droptitle}\centering\huge}
+  \posttitle{\par}
+    \author{Muhammad Apriandito}
+    \preauthor{\centering\large\emph}
+  \postauthor{\par}
+      \predate{\centering\large\emph}
+  \postdate{\par}
+    \date{5/21/2019}
+
+
+\begin{document}
+\maketitle
+
+\hypertarget{k-means-cluster-analysis}{%
+\subsection{K-means Cluster Analysis}\label{k-means-cluster-analysis}}
+
+Clustering adalah serangkaian teknik untuk menemukan sub-kelompok dalam
+suatu set data. Clustering memungkinkan kita untuk mengidentifikasi
+sub-kelompok yang sama, dan kemunkinan dapat dikategorikan.
+
+K-means clustering adalah metode pengelompokan yang paling sederhana dan
+umum digunakan untuk memisahkan dataset ke dalam sekumpulan sub-kelompok
+(K).
+
+\hypertarget{library}{%
+\subsection{Library}\label{library}}
+
+Untuk membuat K-Means Clusterering di R, ada beberapa package yang
+dibutuhkan diantaranya package ``tidyverse'', ``cluster'', dan
+``factoextra''.
+
+tidyverse -\textgreater{} Data Manipulation cluster -\textgreater{}
+Clustering Algorithms factoextra -\textgreater{} Clustering algorithms
+\& visualization
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{# Panggil library yang diperlukan}
+\KeywordTok{library}\NormalTok{(tidyverse)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## Registered S3 methods overwritten by 'ggplot2':
+##   method         from 
+##   [.quosures     rlang
+##   c.quosures     rlang
+##   print.quosures rlang
+\end{verbatim}
+
+\begin{verbatim}
+## -- Attaching packages ------------------------------------------ tidyverse 1.2.1 --
+\end{verbatim}
+
+\begin{verbatim}
+## v ggplot2 3.1.1     v purrr   0.3.2
+## v tibble  2.1.1     v dplyr   0.8.1
+## v tidyr   0.8.3     v stringr 1.4.0
+## v readr   1.3.1     v forcats 0.4.0
+\end{verbatim}
+
+\begin{verbatim}
+## -- Conflicts --------------------------------------------- tidyverse_conflicts() --
+## x dplyr::filter() masks stats::filter()
+## x dplyr::lag()    masks stats::lag()
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{library}\NormalTok{(cluster)}
+\KeywordTok{library}\NormalTok{(factoextra)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## Welcome! Related Books: `Practical Guide To Cluster Analysis in R` at https://goo.gl/13EFCZ
+\end{verbatim}
+
+\hypertarget{data-preparation}{%
+\subsection{Data Preparation}\label{data-preparation}}
+
+Umumnya, dalam melakukan Cluster Analysis. Beberapa tahapan data
+pre-procssing yang perlu dilakukan :
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\tightlist
+\item
+  Menghapus/Mengolah Data Hilang
+\item
+  Normalisasi/Normalisasi
+\end{enumerate}
+
+Dalam praktek kali ini kita akan menggunakan dataset bawaan R yaitu
+``USArrests''. yang merupakan dataset menganai tingkat kejahatan di 50
+Negara Bagian Amerika Serikat pada tahun 1973.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{#Memanggil dataset}
+\NormalTok{df <-}\StringTok{ }\NormalTok{USArrests}
+
+\CommentTok{#Melihat Dimensi Data dim(), berapa kolom dan berapa variable}
+\KeywordTok{dim}\NormalTok{(df)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## [1] 50  4
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{#Melihat 10 Baris Pertama mnggunakan fungsi head}
+\KeywordTok{head}\NormalTok{(df)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+##            Murder Assault UrbanPop Rape
+## Alabama      13.2     236       58 21.2
+## Alaska       10.0     263       48 44.5
+## Arizona       8.1     294       80 31.0
+## Arkansas      8.8     190       50 19.5
+## California    9.0     276       91 40.6
+## Colorado      7.9     204       78 38.7
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{#Mengecek apakah ada Data Kosong (N/A) dalam data. }
+\KeywordTok{sum}\NormalTok{(}\KeywordTok{is.na}\NormalTok{(df))}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## [1] 0
+\end{verbatim}
+
+{[}1{]} 0 Dapat dilihat bahwa tidak ada data kosong didalam dataset
+tersebut, sehingga tidak perlu adanya langkah lebih lanjut terkait data
+kosong.
+
+Selanjutnya, untuk membuat semua feature dalam dataset memliki skala
+yang sama (0-1) kita perlu melalukan standarisasi / penyetaraan skala.
+Standarisasi dapat dilakukan menggunkan fungsi ``scale()''.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{#Lakukan Standarisasi dan assign ke variable baru dengan nama "dfnorm".  }
+\NormalTok{dfnorm <-}\StringTok{ }\KeywordTok{scale}\NormalTok{(df)}
+\end{Highlighting}
+\end{Shaded}
+
+Mari kita cek data kita, setelah dilakukan normalisasi:
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{#Melihat 10 data teratas pada dataset yang telah dinormalisasi}
+\KeywordTok{head}\NormalTok{(dfnorm, }\DecValTok{10}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+##                  Murder    Assault   UrbanPop         Rape
+## Alabama      1.24256408  0.7828393 -0.5209066 -0.003416473
+## Alaska       0.50786248  1.1068225 -1.2117642  2.484202941
+## Arizona      0.07163341  1.4788032  0.9989801  1.042878388
+## Arkansas     0.23234938  0.2308680 -1.0735927 -0.184916602
+## California   0.27826823  1.2628144  1.7589234  2.067820292
+## Colorado     0.02571456  0.3988593  0.8608085  1.864967207
+## Connecticut -1.03041900 -0.7290821  0.7917228 -1.081740768
+## Delaware    -0.43347395  0.8068381  0.4462940 -0.579946294
+## Florida      1.74767144  1.9707777  0.9989801  1.138966691
+## Georgia      2.20685994  0.4828549 -0.3827351  0.487701523
+\end{verbatim}
+
+\hypertarget{clustering-distance-measures}{%
+\subsection{Clustering Distance
+Measures}\label{clustering-distance-measures}}
+
+Pemilihan Disctance Measures merupakan tahapan penting dalam clustering,
+karena akan berpengaruh pada hasil/bentuk clustering. Beberapa distance
+measures yang umum digunakan adalah Euclidean and Manhattan
+distances.Pada praktek kali ini kita akan menggunakan Euclidean distance
+sebagai distance measures.
+
+Dalam R, untuk menghitung dan memvisualisasikan distance matrix, kita
+dapat menggunakan fungsi ``get\_dist()'' dan ``fviz\_dist()''. Di
+visualisasi ini kita akan menggunakan Warna merah untuk menunjukkan
+adanya perbedaan dan warna biru mennujukkan adanya persamaan/Kemiripan.
+
+Keterangan Fungsi: - get\_dist: untuk menghitung distance matrix antar
+raw. Default: Euclidean Distance - fviz\_dist: untuk memvisualisasi
+distance matrix.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{#Menhitung Ditance Matrix menggunakan fungsi get_dist()}
+\CommentTok{#distance <- _____(dfnorm, method = "euclidean" )}
+\NormalTok{distance <-}\StringTok{ }\KeywordTok{get_dist}\NormalTok{(dfnorm, }\DataTypeTok{method =} \StringTok{"euclidean"}\NormalTok{ )}
+
+\CommentTok{#Memvisualisasikan Distance Matrix menggunakan fungsi fviz_dist()}
+\CommentTok{#fviz_dist(distance, gradient = list(low = "#00AFBB", mid = "white", high = "#FC4E07"))}
+\CommentTok{#tanpa diwarnai, akan ada warna default dari R nya}
+\KeywordTok{fviz_dist}\NormalTok{(distance)}
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics{1_Clustering_Model_files/figure-latex/unnamed-chunk-6-1.pdf}
+
+dari gambar hasil grafik, melihat similarity dari fearture yang kita
+punya
+
+\#Computing k-means clustering in R Kita dapat menghitung k-means dalam
+R dengan fungsi ``kmeans''. kali ini kita akan mengelompokkan data
+menjadi dua kelompok (centers = 2).
+
+Fungsi kmeans juga memiliki opsi nstart yang mencoba beberapa
+konfigurasi awal dan menginformasikan yang terbaik. Contohnya,
+menambahkan nilai nstart = 25 akan menghasilkan 25 konfigurasi awal.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{#Membuat Model K-Means Klustering dengan Jumlah K/Centers =2, nstart = 25, dengan nama K2}
+\NormalTok{k2 <-}\StringTok{ }\KeywordTok{kmeans}\NormalTok{(dfnorm, }\DataTypeTok{centers =} \DecValTok{2}\NormalTok{, }\DataTypeTok{nstart =} \DecValTok{25}\NormalTok{)}
+\KeywordTok{str}\NormalTok{(k2)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## List of 9
+##  $ cluster     : Named int [1:50] 1 1 1 2 1 1 2 2 1 1 ...
+##   ..- attr(*, "names")= chr [1:50] "Alabama" "Alaska" "Arizona" "Arkansas" ...
+##  $ centers     : num [1:2, 1:4] 1.005 -0.67 1.014 -0.676 0.198 ...
+##   ..- attr(*, "dimnames")=List of 2
+##   .. ..$ : chr [1:2] "1" "2"
+##   .. ..$ : chr [1:4] "Murder" "Assault" "UrbanPop" "Rape"
+##  $ totss       : num 196
+##  $ withinss    : num [1:2] 46.7 56.1
+##  $ tot.withinss: num 103
+##  $ betweenss   : num 93.1
+##  $ size        : int [1:2] 20 30
+##  $ iter        : int 1
+##  $ ifault      : int 0
+##  - attr(*, "class")= chr "kmeans"
+\end{verbatim}
+
+Keterangan: 1.cluster -\textgreater{} Sebuah vektor bilangan bulat (dari
+1: k) yang menunjukkan cluster yang dialokasikan setiap titik.
+2.center-\textgreater{} pusat dari matrix cluster. 3.totss
+-\textgreater{} total sum of squares. 4.withinss -\textgreater{} Vektor
+jumlah dalam-cluster kuadrat, satu komponen per cluster. 5.tot.withinss
+-\textgreater{} Total within-cluster sum of squares, i.e.~sum(withinss).
+6.betweenss -\textgreater{} The between-cluster sum of squares,
+i.e.~\(totss-tot.withinss\). 7.size -\textgreater{} Jumlah Point
+disetiap Cluster. yang tergabung di cluster 1 adalah 30, sedangkan
+kluster 2 = 20
+
+Kita juga dapat memprint hasil kluster.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{#Print Hasil Kluster}
+\NormalTok{k2}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## K-means clustering with 2 clusters of sizes 20, 30
+## 
+## Cluster means:
+##      Murder    Assault   UrbanPop       Rape
+## 1  1.004934  1.0138274  0.1975853  0.8469650
+## 2 -0.669956 -0.6758849 -0.1317235 -0.5646433
+## 
+## Clustering vector:
+##        Alabama         Alaska        Arizona       Arkansas     California 
+##              1              1              1              2              1 
+##       Colorado    Connecticut       Delaware        Florida        Georgia 
+##              1              2              2              1              1 
+##         Hawaii          Idaho       Illinois        Indiana           Iowa 
+##              2              2              1              2              2 
+##         Kansas       Kentucky      Louisiana          Maine       Maryland 
+##              2              2              1              2              1 
+##  Massachusetts       Michigan      Minnesota    Mississippi       Missouri 
+##              2              1              2              1              1 
+##        Montana       Nebraska         Nevada  New Hampshire     New Jersey 
+##              2              2              1              2              2 
+##     New Mexico       New York North Carolina   North Dakota           Ohio 
+##              1              1              1              2              2 
+##       Oklahoma         Oregon   Pennsylvania   Rhode Island South Carolina 
+##              2              2              2              2              1 
+##   South Dakota      Tennessee          Texas           Utah        Vermont 
+##              2              1              1              2              2 
+##       Virginia     Washington  West Virginia      Wisconsin        Wyoming 
+##              2              2              2              2              2 
+## 
+## Within cluster sum of squares by cluster:
+## [1] 46.74796 56.11445
+##  (between_SS / total_SS =  47.5 %)
+## 
+## Available components:
+## 
+## [1] "cluster"      "centers"      "totss"        "withinss"    
+## [5] "tot.withinss" "betweenss"    "size"         "iter"        
+## [9] "ifault"
+\end{verbatim}
+
+kita juga dapat melihat hasil dengan menggunakan ``fviz\_cluster''. Ini
+memberikan ilustrasi yang bagus tentang cluster.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{# visualisasi kluster menggunakan fungsi fviz_cluster()}
+\KeywordTok{fviz_cluster}\NormalTok{(k2, }\DataTypeTok{data =}\NormalTok{ dfnorm)}
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics{1_Clustering_Model_files/figure-latex/unnamed-chunk-9-1.pdf}
+
+Sebagai alternatif, kita dapat menggunakan scatter plots untuk
+menggambarkan kelompok dibandingkan dengan variabel asli.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{#Visualisasi ScatterPlots menggunakan ggplot2}
+\NormalTok{dfnorm }\OperatorTok{%>%}
+\StringTok{  }\KeywordTok{as_tibble}\NormalTok{() }\OperatorTok{%>%}
+\StringTok{  }\KeywordTok{mutate}\NormalTok{(}\DataTypeTok{cluster =}\NormalTok{ k2}\OperatorTok{$}\NormalTok{cluster,}
+         \DataTypeTok{state =} \KeywordTok{row.names}\NormalTok{(USArrests)) }\OperatorTok{%>%}
+\StringTok{  }\KeywordTok{ggplot}\NormalTok{(}\KeywordTok{aes}\NormalTok{(UrbanPop, Murder, }\DataTypeTok{color =} \KeywordTok{factor}\NormalTok{(cluster), }\DataTypeTok{label =}\NormalTok{ state)) }\OperatorTok{+}
+\StringTok{  }\KeywordTok{geom_text}\NormalTok{()}
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics{1_Clustering_Model_files/figure-latex/unnamed-chunk-10-1.pdf}
+
+Karena jumlah cluster (k) harus ditetapkan sebelum kita memulai
+algoritma, seringkali menguntungkan untuk menggunakan beberapa nilai k
+yang berbeda dan memeriksa perbedaan dalam hasil. Kita dapat menjalankan
+proses yang sama untuk 3, 4, dan 5 cluster.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{#Membuat Untuk kluster dengan masing-masing K =3.4.5}
+\NormalTok{k3 <-}\StringTok{ }\KeywordTok{kmeans}\NormalTok{(dfnorm, }\DataTypeTok{centers =} \DecValTok{3}\NormalTok{, }\DataTypeTok{nstart =} \DecValTok{25}\NormalTok{)}
+\NormalTok{k4 <-}\StringTok{ }\KeywordTok{kmeans}\NormalTok{(dfnorm, }\DataTypeTok{centers =} \DecValTok{4}\NormalTok{, }\DataTypeTok{nstart =} \DecValTok{25}\NormalTok{)}
+\NormalTok{k5 <-}\StringTok{ }\KeywordTok{kmeans}\NormalTok{(dfnorm, }\DataTypeTok{centers =} \DecValTok{5}\NormalTok{, }\DataTypeTok{nstart =} \DecValTok{25}\NormalTok{)}
+
+\CommentTok{# Membuat Komparasi Plot}
+\NormalTok{p1 <-}\StringTok{ }\KeywordTok{fviz_cluster}\NormalTok{(k2, }\DataTypeTok{geom =} \StringTok{"point"}\NormalTok{, }\DataTypeTok{data =}\NormalTok{ dfnorm) }\OperatorTok{+}\StringTok{ }\KeywordTok{ggtitle}\NormalTok{(}\StringTok{"k = 2"}\NormalTok{)}
+\NormalTok{p2 <-}\StringTok{ }\KeywordTok{fviz_cluster}\NormalTok{(k3, }\DataTypeTok{geom =} \StringTok{"point"}\NormalTok{, }\DataTypeTok{data =}\NormalTok{ dfnorm) }\OperatorTok{+}\StringTok{ }\KeywordTok{ggtitle}\NormalTok{(}\StringTok{"k = 3"}\NormalTok{)}
+\NormalTok{p3 <-}\StringTok{ }\KeywordTok{fviz_cluster}\NormalTok{(k4, }\DataTypeTok{geom =} \StringTok{"point"}\NormalTok{, }\DataTypeTok{data =}\NormalTok{ dfnorm) }\OperatorTok{+}\StringTok{ }\KeywordTok{ggtitle}\NormalTok{(}\StringTok{"k = 4"}\NormalTok{)}
+\NormalTok{p4 <-}\StringTok{ }\KeywordTok{fviz_cluster}\NormalTok{(k5, }\DataTypeTok{geom =} \StringTok{"point"}\NormalTok{, }\DataTypeTok{data =}\NormalTok{ dfnorm) }\OperatorTok{+}\StringTok{ }\KeywordTok{ggtitle}\NormalTok{(}\StringTok{"k = 5"}\NormalTok{)}
+
+\CommentTok{#install packages gridExtra}
+\KeywordTok{library}\NormalTok{(gridExtra) }
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## 
+## Attaching package: 'gridExtra'
+\end{verbatim}
+
+\begin{verbatim}
+## The following object is masked from 'package:dplyr':
+## 
+##     combine
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{grid.arrange}\NormalTok{(p1, p2, p3, p4, }\DataTypeTok{nrow =} \DecValTok{2}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics{1_Clustering_Model_files/figure-latex/unnamed-chunk-11-1.pdf}
+
+\#\#Determining Optimal Clusters Untuk membantu analis, berikut ini
+merupakan dua metode yang populer untuk menentukan nilai Optimal CLuter:
+1. Elbow method 2. Silhouette method
+
+\#Elbow Method
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{set.seed}\NormalTok{(}\DecValTok{123}\NormalTok{)}
+
+\CommentTok{# function to compute total within-cluster sum of square }
+\NormalTok{wss <-}\StringTok{ }\ControlFlowTok{function}\NormalTok{(k) \{}
+  \KeywordTok{kmeans}\NormalTok{(dfnorm, k, }\DataTypeTok{nstart =} \DecValTok{10}\NormalTok{ )}\OperatorTok{$}\NormalTok{tot.withinss}
+\NormalTok{\}}
+
+\CommentTok{# Compute and plot wss for k = 1 to k = 15}
+\NormalTok{k.values <-}\StringTok{ }\DecValTok{1}\OperatorTok{:}\DecValTok{15}
+
+\CommentTok{# extract wss for 2-15 clusters}
+\NormalTok{wss_values <-}\StringTok{ }\KeywordTok{map_dbl}\NormalTok{(k.values, wss)}
+
+\KeywordTok{plot}\NormalTok{(k.values, wss_values,}
+       \DataTypeTok{type=}\StringTok{"b"}\NormalTok{, }\DataTypeTok{pch =} \DecValTok{19}\NormalTok{, }\DataTypeTok{frame =} \OtherTok{FALSE}\NormalTok{, }
+       \DataTypeTok{xlab=}\StringTok{"Number of clusters K"}\NormalTok{,}
+       \DataTypeTok{ylab=}\StringTok{"Total within-clusters sum of squares"}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics{1_Clustering_Model_files/figure-latex/unnamed-chunk-12-1.pdf}
+Hasilnya menunjukkan bahwa 4 adalah jumlah cluster optimal karena berada
+diposisi siku. TItik tengah dari siku. siku = 23456, maka titik tengah =
+4
+
+Kita dengan cepat dapat menghitung Elbow Method menggunakan fungsi
+fviz\_nbclust()
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{#Visualisasi Elbow Method menggunakan fungsi fviz_nbclust()}
+\KeywordTok{fviz_nbclust}\NormalTok{(dfnorm, kmeans, }\DataTypeTok{method =} \StringTok{"wss"}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics{1_Clustering_Model_files/figure-latex/unnamed-chunk-13-1.pdf}
+
+\#Average Silhouette Method Singkatnya, pendekatan siluet mengukur
+kualitas pengelompokan. Artinya, menentukan seberapa baik setiap objek
+terletak di dalam klusternya. Lebar siluet rata-rata yang tinggi
+menunjukkan pengelompokan yang baik
+
+Kita bisa menggunakan fungsi Silhouette dalam package cluster untuk
+menghitung lebar Silhouette rata-rata. code berikut menghitung
+pendekatan ini untuk 1-15 cluster. Hasilnya menunjukkan bahwa 2 klaster
+memaksimalkan nilai rata-rata Silhouette dengan 4 klaster yang masuk
+sebagai jumlah klaster optimal kedua.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{# function to compute average silhouette for k clusters }
+\NormalTok{avg_sil <-}\StringTok{ }\ControlFlowTok{function}\NormalTok{(k) \{}
+\NormalTok{  km.res <-}\StringTok{ }\KeywordTok{kmeans}\NormalTok{(dfnorm, }\DataTypeTok{centers =}\NormalTok{ k, }\DataTypeTok{nstart =} \DecValTok{25}\NormalTok{)}
+\NormalTok{  ss <-}\StringTok{ }\KeywordTok{silhouette}\NormalTok{(km.res}\OperatorTok{$}\NormalTok{cluster, }\KeywordTok{dist}\NormalTok{(df))}
+  \KeywordTok{mean}\NormalTok{(ss[, }\DecValTok{3}\NormalTok{])}
+\NormalTok{\}}
+
+\CommentTok{# Compute and plot wss for k = 2 to k = 15}
+\NormalTok{k.values <-}\StringTok{ }\DecValTok{2}\OperatorTok{:}\DecValTok{15}
+
+\CommentTok{# extract avg silhouette for 2-15 clusters}
+\NormalTok{avg_sil_values <-}\StringTok{ }\KeywordTok{map_dbl}\NormalTok{(k.values, avg_sil)}
+
+\KeywordTok{plot}\NormalTok{(k.values, avg_sil_values,}
+       \DataTypeTok{type =} \StringTok{"b"}\NormalTok{, }\DataTypeTok{pch =} \DecValTok{19}\NormalTok{, }\DataTypeTok{frame =} \OtherTok{FALSE}\NormalTok{, }
+       \DataTypeTok{xlab =} \StringTok{"Number of clusters K"}\NormalTok{,}
+       \DataTypeTok{ylab =} \StringTok{"Average Silhouettes"}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics{1_Clustering_Model_files/figure-latex/unnamed-chunk-14-1.pdf}
+paling bagus cluster paling tinggi di 2.
+
+Kita dengan cepat dapat menghitung Average Silhouette dalam satu fungsi
+fviz\_nbclust.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{#Visualisasi Average Silhoutte menggunakan fugsi fviz_nbclust()}
+\KeywordTok{fviz_nbclust}\NormalTok{(dfnorm, kmeans, }\DataTypeTok{method =} \StringTok{"silhouette"}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics{1_Clustering_Model_files/figure-latex/unnamed-chunk-15-1.pdf}
+paling bagus cluster paling tinggi di 2.
+
+\#Extracting Results Dengan sebagian besar pendekatan ini menyarankan 4
+sebagai jumlah cluster optimal, kita dapat melakukan analisis akhir dan
+mengekstraksi hasilnya menggunakan 4 cluster.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{# Compute k-means clustering with k = 4}
+\KeywordTok{set.seed}\NormalTok{(}\DecValTok{123}\NormalTok{)}
+\NormalTok{final <-}\StringTok{ }\KeywordTok{kmeans}\NormalTok{(dfnorm, }\DecValTok{4}\NormalTok{, }\DataTypeTok{nstart =} \DecValTok{25}\NormalTok{)}
+\KeywordTok{print}\NormalTok{(final)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## K-means clustering with 4 clusters of sizes 8, 13, 16, 13
+## 
+## Cluster means:
+##       Murder    Assault   UrbanPop        Rape
+## 1  1.4118898  0.8743346 -0.8145211  0.01927104
+## 2 -0.9615407 -1.1066010 -0.9301069 -0.96676331
+## 3 -0.4894375 -0.3826001  0.5758298 -0.26165379
+## 4  0.6950701  1.0394414  0.7226370  1.27693964
+## 
+## Clustering vector:
+##        Alabama         Alaska        Arizona       Arkansas     California 
+##              1              4              4              1              4 
+##       Colorado    Connecticut       Delaware        Florida        Georgia 
+##              4              3              3              4              1 
+##         Hawaii          Idaho       Illinois        Indiana           Iowa 
+##              3              2              4              3              2 
+##         Kansas       Kentucky      Louisiana          Maine       Maryland 
+##              3              2              1              2              4 
+##  Massachusetts       Michigan      Minnesota    Mississippi       Missouri 
+##              3              4              2              1              4 
+##        Montana       Nebraska         Nevada  New Hampshire     New Jersey 
+##              2              2              4              2              3 
+##     New Mexico       New York North Carolina   North Dakota           Ohio 
+##              4              4              1              2              3 
+##       Oklahoma         Oregon   Pennsylvania   Rhode Island South Carolina 
+##              3              3              3              3              1 
+##   South Dakota      Tennessee          Texas           Utah        Vermont 
+##              2              1              4              3              2 
+##       Virginia     Washington  West Virginia      Wisconsin        Wyoming 
+##              3              3              2              2              3 
+## 
+## Within cluster sum of squares by cluster:
+## [1]  8.316061 11.952463 16.212213 19.922437
+##  (between_SS / total_SS =  71.2 %)
+## 
+## Available components:
+## 
+## [1] "cluster"      "centers"      "totss"        "withinss"    
+## [5] "tot.withinss" "betweenss"    "size"         "iter"        
+## [9] "ifault"
+\end{verbatim}
+
+kita dapat memvisualisasikan hasil menggunakan (fviz\_cluster)
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{# Visualisasi Final Cluster}
+\KeywordTok{fviz_cluster}\NormalTok{(final, }\DataTypeTok{data =}\NormalTok{ dfnorm)}
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics{1_Clustering_Model_files/figure-latex/unnamed-chunk-17-1.pdf}
+
+Dan kita dapat mengekstrak cluster dan menambah data awal kita untuk
+melakukan beberapa statistik deskriptif (rata-rata) di tingkat cluster
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{USArrests }\OperatorTok{%>%}
+\StringTok{  }\KeywordTok{mutate}\NormalTok{(}\DataTypeTok{Cluster =}\NormalTok{ final}\OperatorTok{$}\NormalTok{cluster) }\OperatorTok{%>%}
+\StringTok{  }\KeywordTok{group_by}\NormalTok{(Cluster) }\OperatorTok{%>%}
+\StringTok{  }\KeywordTok{summarise_all}\NormalTok{(}\StringTok{"mean"}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## # A tibble: 4 x 5
+##   Cluster Murder Assault UrbanPop  Rape
+##     <int>  <dbl>   <dbl>    <dbl> <dbl>
+## 1       1  13.9    244.      53.8  21.4
+## 2       2   3.6     78.5     52.1  12.2
+## 3       3   5.66   139.      73.9  18.8
+## 4       4  10.8    257.      76    33.2
+\end{verbatim}
+
+
+\end{document}

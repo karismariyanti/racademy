@@ -2,7 +2,9 @@
 title: "K-means Clustering"
 author: "Muhammad Apriandito"
 date: "5/21/2019"
-output: html_document
+output:
+  pdf_document: default
+  html_document: default
 ---
 
 ```{r setup, include=FALSE}
