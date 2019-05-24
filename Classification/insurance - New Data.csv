@@ -1,0 +1,4 @@
+Age,Sex,Bmi,Children,Smoker,Region,Charges,Claim
+36,Female,27.9,0,Non Smoker,Southwest,16884.924,
+37,Male,33.77,0,Smoker,Northwest,1725.5523,
+21,Female,25,0,Non Smoker,Southeast,908.092,
