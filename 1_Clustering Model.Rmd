@@ -64,6 +64,7 @@ Selanjutnya, untuk membuat semua feature dalam dataset memliki skala yang sama (
 ```{r}
 #Lakukan Standarisasi dan assign ke variable baru dengan nama "dfnorm".  
 dfnorm <- scale(df)
+dfnorm
 ```
 
 Mari kita cek data kita, setelah dilakukan normalisasi:
